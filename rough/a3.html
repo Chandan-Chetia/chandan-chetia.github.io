@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3D Corner Image Rotation</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:Inter,system-ui,Arial,sans-serif}
+body{overflow-x:hidden;color:#eef6ff;background:radial-gradient(circle at 78% 48%,rgba(0,110,255,.16),transparent 28%),radial-gradient(circle at 18% 80%,rgba(20,60,130,.12),transparent 30%),#02050a}
+.hero{min-height:100vh;width:min(1500px,100%);margin:auto;display:grid;grid-template-columns:48% 52%;align-items:center;padding:50px 4vw;gap:20px}
+.content{padding:30px;max-width:650px}.badge{display:inline-flex;padding:9px 14px;border:1px solid rgba(110,180,255,.18);border-radius:999px;background:rgba(50,120,220,.06);color:#83bdf2;font-size:11px;letter-spacing:.12em;text-transform:uppercase;backdrop-filter:blur(15px)}
+h1{margin:22px 0 18px;font-size:clamp(48px,6vw,82px);line-height:.95;letter-spacing:-.055em}h1 span{color:#72b9ff}.content p{max-width:570px;color:#8795a8;font-size:16px;line-height:1.8}.buttons{display:flex;gap:12px;margin-top:30px}button{border:0;border-radius:999px;padding:14px 21px;font-weight:700;cursor:pointer}.primary{color:#06111f;background:linear-gradient(135deg,#e9f6ff,#83c4ff)}.secondary{color:#c8d8ea;background:rgba(60,130,220,.07);border:1px solid rgba(120,185,255,.14)}
+.animation{position:relative;width:min(650px,100%);height:min(650px,78vh);min-height:520px;margin:auto;perspective:1100px}
+.big-frame{position:absolute;left:13%;top:15%;width:74%;height:70%;border-radius:30px;overflow:hidden;z-index:1;border:1px solid rgba(125,190,255,.14);background:rgba(255,255,255,.025);box-shadow:0 35px 90px rgba(0,0,0,.55),0 0 70px rgba(0,105,255,.08),inset 0 1px 0 rgba(255,255,255,.08);transform:translateZ(-80px)}
+.big-frame img{width:100%;height:100%;object-fit:cover;filter:saturate(.8) brightness(.72);transform:scale(1.05)}.big-frame:after{content:"";position:absolute;inset:0;background:linear-gradient(135deg,rgba(5,25,55,.35),rgba(0,0,0,.15)),radial-gradient(circle at 50% 40%,transparent,rgba(0,0,0,.38))}.big-frame:before{content:"";position:absolute;inset:12px;border:1px solid rgba(150,210,255,.07);border-radius:22px;z-index:2}
+.orbit{position:absolute;inset:0;z-index:5;transform-style:preserve-3d}
+.card{--size:145px;position:absolute;width:var(--size);height:var(--size);overflow:hidden;border-radius:22px;padding:0;border:1px solid rgba(145,205,255,.42);background:#08111d;box-shadow:0 22px 50px rgba(0,0,0,.55),0 0 35px rgba(0,100,255,.08),inset 0 1px 0 rgba(255,255,255,.14);transform-style:preserve-3d;will-change:transform,left,top}
+.card img{width:100%;height:100%;object-fit:cover;display:block}.card-1{left:6%;top:7%}.card-2{right:6%;top:4%}.card-3{right:4%;bottom:7%}.card-4{left:3%;bottom:4%}.card.active{box-shadow:0 28px 60px rgba(0,0,0,.62),0 0 45px rgba(50,150,255,.28),inset 0 1px 0 rgba(255,255,255,.2)}
+.corner-label{position:absolute;left:50%;bottom:2%;transform:translateX(-50%);z-index:8;padding:10px 15px;border:1px solid rgba(110,180,255,.13);border-radius:999px;background:rgba(15,35,60,.45);color:#718399;font-size:10px;letter-spacing:.12em;text-transform:uppercase;backdrop-filter:blur(16px);white-space:nowrap}
+@media(max-width:900px){.hero{grid-template-columns:1fr;padding:35px 20px 60px}.content{text-align:center;margin:auto}.content p{margin-left:auto;margin-right:auto}.buttons{justify-content:center}.animation{height:600px;min-height:500px}}
+@media(max-width:600px){.animation{height:480px;min-height:430px}.card{--size:105px;border-radius:17px}.big-frame{left:13%;top:16%;width:74%;height:68%}.corner-label{font-size:8px}}
+</style>
+</head>
+<body>
+<section class="hero">
+<div class="content"><div class="badge">AI • Robotics • Software</div><h1>Build ideas.<br><span>Make them real.</span></h1><p>Your normal website content goes here. The animated image system stays completely on the right side, leaving this area free for your headline, description, buttons, projects or anything else.</p><div class="buttons"><button class="primary">Explore Projects →</button><button class="secondary">About Me</button></div></div>
+<div class="animation">
+<div class="big-frame"><img src="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1100&q=85" alt="Large technology image"></div>
+<div class="orbit">
+<div class="card card-1"><img src="https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=500&q=85" alt="Robot"></div>
+<div class="card card-2"><img src="https://images.unsplash.com/photo-1535378917042-10a22c95931a?auto=format&fit=crop&w=500&q=85" alt="Robotics"></div>
+<div class="card card-3"><img src="https://images.unsplash.com/photo-1555255707-c07966088b7b?auto=format&fit=crop&w=500&q=85" alt="Artificial intelligence"></div>
+<div class="card card-4"><img src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=500&q=85" alt="Technology"></div>
+</div><div class="corner-label">Continuous 3D image rotation</div>
+</div></section>
+<script>
+const cards=[...document.querySelectorAll(".card")];
+const points=[{x:6,y:7},{x:75,y:4},{x:77,y:73},{x:3,y:76}];
+let progress=[0,1,2,3],last=performance.now();
+const speed=.00022;
+const lerp=(a,b,t)=>a+(b-a)*t;
+const ease=t=>t*t*(3-2*t);
+function position(p){let i=Math.floor(p)%4,n=(i+1)%4,t=ease(p-Math.floor(p));return{x:lerp(points[i].x,points[n].x,t),y:lerp(points[i].y,points[n].y,t)}}
+function scaleAt(p){let n=((p%4)+4)%4,d=Math.min(Math.abs(n-2.35),4-Math.abs(n-2.35)),s=1-Math.min(d/1.55,1);return .82+s*.27}
+function animate(now){let dt=now-last;last=now;progress=progress.map(p=>(p+speed*dt)%4);cards.forEach((card,i)=>{let q=position(progress[i]),s=scaleAt(progress[i]),z=(s-.82)*260;card.style.left=q.x+"%";card.style.top=q.y+"%";card.style.transform=`translateZ(${z}px) scale(${s})`;card.style.zIndex=100+Math.round(s*100);card.classList.toggle("active",s>.98)});requestAnimationFrame(animate)}
+requestAnimationFrame(animate);
+</script>
+</body>
+</html>

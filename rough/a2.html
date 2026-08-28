@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>3D Side Carousel</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: #050505;
+            color: white;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+        }
+
+        .page {
+            width: 100vw;
+            height: 100vh;
+
+            display: flex;
+            align-items: center;
+
+            /* 5% padding only on the left side */
+            padding: 30px 0 30px 5%;
+        }
+
+        /* ==============================
+           LEFT CONTENT
+        ============================== */
+
+        .content {
+            width: 50%;
+            height: 100%;
+
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+
+            padding-right: 50px;
+
+            position: relative;
+            z-index: 20;
+        }
+
+        .content h1 {
+            font-size: 70px;
+            margin-bottom: 20px;
+        }
+
+        .content p {
+            max-width: 500px;
+
+            color: #999;
+            font-size: 18px;
+            line-height: 1.6;
+
+            margin-bottom: 30px;
+        }
+
+        .button {
+            display: inline-block;
+            width: fit-content;
+
+            padding: 14px 28px;
+
+            border-radius: 30px;
+
+            background: white;
+            color: black;
+
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        /* ==============================
+           RIGHT ANIMATION
+        ============================== */
+
+        .animation-area {
+            width: 50%;
+            height: 100%;
+
+            position: relative;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            perspective: 1400px;
+
+            /* Crop the animation at the edges */
+            overflow: hidden;
+        }
+
+        .carousel {
+            width: 120%;
+            height: 100%;
+
+            position: relative;
+
+            transform-style: preserve-3d;
+
+            /* Push the carousel slightly to the right */
+            transform: translateX(70px);
+        }
+
+        /* ==============================
+           IMAGE
+        ============================== */
+
+        .card {
+            position: absolute;
+
+            width: 260px;
+            height: 260px;
+
+            left: 50%;
+            top: 50%;
+
+            margin-left: -130px;
+            margin-top: -130px;
+
+            border-radius: 50%;
+
+            overflow: hidden;
+
+            border: 3px solid rgba(255, 255, 255, 0.8);
+
+            background: #111;
+
+            transform-style: preserve-3d;
+
+            transition:
+                transform 1.5s cubic-bezier(0.65, 0, 0.35, 1),
+                opacity 1.5s ease,
+                filter 1.5s ease;
+
+            will-change: transform;
+        }
+
+        .card img {
+            width: 100%;
+            height: 100%;
+
+            object-fit: cover;
+
+            display: block;
+        }
+
+        /* Highlight on image */
+
+        .card::after {
+            content: "";
+
+            position: absolute;
+            inset: 0;
+
+            border-radius: 50%;
+
+            background:
+                radial-gradient(circle at 30% 20%,
+                    rgba(255, 255, 255, 0.3),
+                    transparent 35%);
+
+            pointer-events: none;
+        }
+
+        /* ==============================
+           MOBILE
+        ============================== */
+
+        @media (max-width: 900px) {
+
+            body {
+                overflow-y: auto;
+            }
+
+            .page {
+                flex-direction: column;
+                height: auto;
+
+                padding: 40px 20px;
+            }
+
+            .content {
+                width: 100%;
+                height: auto;
+
+                padding-right: 0;
+
+                text-align: center;
+                align-items: center;
+            }
+
+            .animation-area {
+                width: 100%;
+                height: 600px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="page">
+
+        <!-- =========================================
+             LEFT SIDE
+        ========================================== -->
+
+        <section class="content">
+
+            <h1>
+                Your Content
+            </h1>
+
+            <p>
+                Put your normal website content here.
+                The animated 3D image carousel stays on
+                the right side.
+            </p>
+
+            <a href="#" class="button">
+                Explore
+            </a>
+
+        </section>
+
+        <!-- =========================================
+             RIGHT SIDE
+        ========================================== -->
+
+        <section class="animation-area">
+
+            <div class="carousel">
+
+                <!-- IMAGE 1 -->
+
+                <div class="card">
+                    <img src="https://picsum.photos/id/1015/600/600" alt="Image 1" />
+                </div>
+
+                <!-- IMAGE 2 -->
+
+                <div class="card">
+                    <img src="https://picsum.photos/id/1016/600/600" alt="Image 2" />
+                </div>
+
+                <!-- IMAGE 3 -->
+
+                <div class="card">
+                    <img src="https://picsum.photos/id/1025/600/600" alt="Image 3" />
+                </div>
+
+                <!-- IMAGE 4 -->
+
+                <div class="card">
+                    <img src="https://picsum.photos/id/1035/600/600" alt="Image 4" />
+                </div>
+
+                <!-- IMAGE 5 -->
+
+                <div class="card">
+                    <img src="https://picsum.photos/id/1040/600/600" alt="Image 5" />
+                </div>
+
+            </div>
+
+        </section>
+
+    </div>
+
+    <script>
+        const cards = document.querySelectorAll(".card");
+
+        /*
+        ========================================================
+        POSITIONS
+
+                          5
+                          ↓
+
+                    ↘
+
+                        1
+                       FRONT
+
+                    ↗
+
+                          2
+                          ↓
+
+
+        0 = FRONT
+        1 = LOWER RIGHT
+        2 = FAR LOWER RIGHT
+        3 = FAR UPPER RIGHT
+        4 = UPPER RIGHT
+        ========================================================
+        */
+
+        const positions = [{
+            // FRONT
+            x: 20,
+            y: 0,
+            z: 300,
+            scale: 1,
+            opacity: 1,
+            rotateY: 0,
+            zIndex: 100
+        }, {
+            // LOWER RIGHT
+            x: 260,
+            y: 190,
+            z: 80,
+            scale: 0.78,
+            opacity: 0.9,
+            rotateY: -20,
+            zIndex: 50
+        }, {
+            // FAR LOWER RIGHT
+            x: 430,
+            y: 350,
+            z: -180,
+            scale: 0.5,
+            opacity: 0.35,
+            rotateY: -40,
+            zIndex: 10
+        }, {
+            // FAR UPPER RIGHT
+            x: 430,
+            y: -350,
+            z: -180,
+            scale: 0.5,
+            opacity: 0.35,
+            rotateY: -40,
+            zIndex: 10
+        }, {
+            // UPPER RIGHT
+            x: 260,
+            y: -190,
+            z: 80,
+            scale: 0.78,
+            opacity: 0.9,
+            rotateY: -20,
+            zIndex: 50
+        }];
+
+        /*
+        ========================================================
+        CURRENT POSITION OF EACH IMAGE
+        ========================================================
+        */
+
+        let currentPositions = [
+            0,
+            1,
+            2,
+            3,
+            4
+        ];
+
+        /*
+        ========================================================
+        DRAW IMAGES
+        ========================================================
+        */
+
+        function render() {
+
+            cards.forEach((card, index) => {
+
+                const position =
+                    positions[currentPositions[index]];
+
+                card.style.transform = `
+              translate3d(
+                ${position.x}px,
+                ${position.y}px,
+                ${position.z}px
+              )
+              rotateY(${position.rotateY}deg)
+              scale(${position.scale})
+            `;
+
+                card.style.opacity =
+                    position.opacity;
+
+                card.style.zIndex =
+                    position.zIndex;
+
+                /*
+                Blur back images slightly.
+                */
+
+                if (currentPositions[index] === 0) {
+
+                    card.style.filter =
+                        "blur(0px)";
+
+                } else {
+
+                    card.style.filter =
+                        "blur(1px)";
+                }
+
+            });
+
+        }
+
+        /*
+        ========================================================
+        INITIALIZE
+        ========================================================
+        */
+
+        render();
+
+        /*
+        ========================================================
+        ROTATION
+        ========================================================
+        */
+
+        setInterval(() => {
+
+            currentPositions =
+                currentPositions.map((position) => {
+
+                    return (position + 1) % 5;
+
+                });
+
+            render();
+
+        }, 2000);
+    </script>
+
+</body>
+</html>
