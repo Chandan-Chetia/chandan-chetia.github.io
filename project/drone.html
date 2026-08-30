@@ -532,6 +532,9 @@
             height: 77%;
             border-radius: 16px;
             overflow: hidden;
+            opacity: 0;
+            animation: heroSlideBig 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            animation-delay: 0.1s;
         }
         .big-image img {
             width: 100%;
@@ -554,22 +557,74 @@
             width: 40%;
             aspect-ratio: 1/1;
             transform: translate(-50%, -50%);
+            opacity: 0;
+            animation: heroSlideCorner 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
         }
         .corner.tl {
             left: 14.5%;
             top: 14.5%;
+            animation-delay: 0.2s;
+            --final-left: 14.5%;
+            --final-top: 14.5%;
+            --from-x: -160%;
+            --from-y: -20%;
         }
         .corner.tr {
             left: 85.5%;
             top: 14.5%;
+            animation-delay: 0.3s;
+            --final-left: 85.5%;
+            --final-top: 14.5%;
+            --from-x: -220%;
+            --from-y: -20%;
         }
         .corner.bl {
             left: 14.5%;
             top: 85.5%;
+            animation-delay: 0.4s;
+            --final-left: 14.5%;
+            --final-top: 85.5%;
+            --from-x: -160%;
+            --from-y: 20%;
         }
         .corner.br {
             left: 85.5%;
             top: 85.5%;
+            animation-delay: 0.5s;
+            --final-left: 85.5%;
+            --final-top: 85.5%;
+            --from-x: -220%;
+            --from-y: 20%;
+        }
+
+        /* ── hero slide keyframes ── */
+        @keyframes heroSlideBig {
+            0% {
+                opacity: 0;
+                left: -15%;
+                top: 50%;
+                transform: translateY(-50%) scale(0.9);
+            }
+            100% {
+                opacity: 1;
+                left: 13%;
+                top: 13%;
+                transform: translateY(0) scale(1);
+            }
+        }
+        @keyframes heroSlideCorner {
+            0% {
+                opacity: 0;
+                left: var(--from-x, -120%);
+                top: var(--from-y, -120%);
+                transform: translate(-50%, -50%) scale(0.7);
+            }
+            100% {
+                opacity: 1;
+                left: var(--final-left, 14.5%);
+                top: var(--final-top, 14.5%);
+                transform: translate(-50%, -50%) scale(1);
+            }
         }
 
         /* ── Photo base ── */
@@ -953,10 +1008,712 @@
             .back-btn::after {
                 animation: none !important;
             }
+            .reveal,
+            .scroll-scale {
+                opacity: 1 !important;
+                transform: none !important;
+            }
+            .big-image,
+            .corner {
+                opacity: 1 !important;
+                animation: none !important;
+            }
+        }
+
+        /* ══════════════════════════════════════════════
+           REPORT SECTIONS — scroll narrative
+           ══════════════════════════════════════════════ */
+
+        /* ── Scroll progress bar ── */
+        .scroll-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            z-index: 999;
+            background: rgba(255, 255, 255, 0.04);
+            pointer-events: none;
+        }
+        .scroll-progress__bar {
+            height: 100%;
+            width: 100%;
+            transform-origin: left center;
+            transform: scaleX(0);
+            background: linear-gradient(90deg, var(--blue-accent), var(--blue-pale));
+            box-shadow: 0 0 12px var(--blue-glow);
+        }
+
+        /* ── Generic section shell, matches .page card language ── */
+        .section-card {
+            position: relative;
+            z-index: 1;
+            width: min(1480px, calc(100vw - 28px));
+            margin: 0 auto 14px;
+            border-radius: 36px;
+            background: rgba(10, 10, 12, 0.80);
+            border: 1px solid var(--border);
+            box-shadow:
+                0 40px 120px rgba(0, 0, 0, 0.55),
+                0 0 0 1px rgba(255, 255, 255, 0.015) inset;
+            overflow: hidden;
+            padding: 64px 56px;
+        }
+        .section-card::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: 36px;
+            padding: 1px;
+            background: linear-gradient(145deg,
+                    rgba(255, 255, 255, 0.04),
+                    rgba(255, 255, 255, 0.01) 50%,
+                    rgba(255, 255, 255, 0.02));
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+        }
+
+        .section-head {
+            position: relative;
+            z-index: 2;
+            max-width: 760px;
+            margin-bottom: 48px;
+        }
+        .section-head .eyebrow {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: var(--font-mono);
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            font-size: 0.7rem;
+            color: var(--blue-light);
+            margin-bottom: 14px;
+        }
+        .section-head .eyebrow .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--blue-accent);
+            box-shadow: 0 0 12px var(--blue-glow);
+            animation: dotPulse 2.8s ease-in-out infinite;
+        }
+        .section-head h2 {
+            font-family: var(--font-display);
+            font-size: clamp(1.7rem, 2.8vw, 2.5rem);
+            letter-spacing: -0.02em;
+            line-height: 1.15;
+            margin-bottom: 16px;
+            color: var(--text);
+        }
+        .section-head h2 em {
+            font-style: normal;
+            color: var(--blue-accent);
+        }
+        .section-head p {
+            color: var(--muted);
+            line-height: 1.75;
+            font-size: 0.98rem;
+            max-width: 640px;
+        }
+
+        /* ── Reveal-on-scroll (one-shot) ── */
+        .reveal {
+            opacity: 0;
+            transform: translateY(32px);
+            transition:
+                opacity 0.9s cubic-bezier(0.16, 0.8, 0.24, 1),
+                transform 0.9s cubic-bezier(0.16, 0.8, 0.24, 1);
+            transition-delay: calc(var(--d, 0) * 90ms);
+        }
+        .reveal.is-visible {
+            opacity: 1;
+            transform: none;
+        }
+
+        /* ── Continuous scroll-linked scale/fade ── */
+        .scroll-scale {
+            transform: scale(calc(0.93 + var(--p, 0) * 0.07));
+            opacity: calc(0.45 + var(--p, 0) * 0.55);
+            will-change: transform, opacity;
+        }
+
+        /* ── Stat row ── */
+        .stat-row {
+            position: relative;
+            z-index: 2;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 18px;
+        }
+        .stat {
+            padding: 22px 20px;
+            border-radius: 18px;
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.02);
+        }
+        .stat strong {
+            display: block;
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            color: var(--blue-light);
+            margin-bottom: 6px;
+            letter-spacing: -0.01em;
+        }
+        .stat span {
+            font-size: 0.76rem;
+            color: var(--muted);
+            line-height: 1.5;
+        }
+
+        /* ── Component grid ── */
+        .component-grid {
+            position: relative;
+            z-index: 2;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px;
+        }
+        .component-card {
+            padding: 24px 22px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.02);
+            transition: border-color 0.3s ease, background 0.3s ease, transform 0.3s ease;
+        }
+        .component-card:hover {
+            border-color: rgba(74, 143, 216, 0.3);
+            background: rgba(74, 143, 216, 0.04);
+            transform: translateY(-4px);
+        }
+        .component-card .num {
+            display: block;
+            font-family: var(--font-mono);
+            font-size: 0.72rem;
+            color: var(--blue-accent);
+            letter-spacing: 0.08em;
+            margin-bottom: 10px;
+        }
+        .component-card h3 {
+            font-family: var(--font-display);
+            font-size: 1.05rem;
+            margin-bottom: 8px;
+            color: var(--text);
+        }
+        .component-card p {
+            color: var(--muted);
+            font-size: 0.85rem;
+            line-height: 1.6;
+        }
+
+        /* ── Build process — sticky scrollytelling ── */
+        .build-layout {
+            position: relative;
+            z-index: 2;
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            gap: 48px;
+        }
+        .build-nav {
+            position: sticky;
+            top: 110px;
+            align-self: start;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .build-nav button {
+            all: unset;
+            cursor: pointer;
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-family: var(--font-mono);
+            font-size: 0.76rem;
+            letter-spacing: 0.02em;
+            color: var(--muted);
+            border-left: 2px solid transparent;
+            transition: color 0.3s ease, border-color 0.3s ease, background 0.3s ease;
+        }
+        .build-nav button.active {
+            color: var(--blue-light);
+            border-left-color: var(--blue-accent);
+            background: rgba(74, 143, 216, 0.06);
+        }
+        .build-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 60px;
+        }
+        .build-step .step-num {
+            display: block;
+            font-family: var(--font-mono);
+            color: var(--blue-accent);
+            font-size: 0.74rem;
+            letter-spacing: 0.1em;
+            margin-bottom: 10px;
+        }
+        .build-step h3 {
+            font-family: var(--font-display);
+            font-size: 1.3rem;
+            margin-bottom: 12px;
+            color: var(--text);
+        }
+        .build-step p {
+            color: var(--muted);
+            line-height: 1.75;
+            font-size: 0.92rem;
+            max-width: 640px;
+        }
+
+        /* ── Vertical timeline ── */
+        .timeline {
+            position: relative;
+            z-index: 2;
+            padding-left: 34px;
+        }
+        .timeline-track {
+            position: absolute;
+            left: 0;
+            top: 6px;
+            bottom: 6px;
+            width: 2px;
+            background: rgba(255, 255, 255, 0.06);
+        }
+        .timeline-track::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: var(--fill, 0%);
+            background: linear-gradient(180deg, var(--blue-accent), var(--blue-pale));
+            box-shadow: 0 0 10px var(--blue-glow);
+        }
+        .timeline-item {
+            position: relative;
+            padding: 0 0 38px 30px;
+        }
+        .timeline-item:last-child {
+            padding-bottom: 0;
+        }
+        .timeline-item::before {
+            content: "";
+            position: absolute;
+            left: -39px;
+            top: 4px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--bg);
+            border: 2px solid var(--blue-accent);
+            box-shadow: 0 0 0 4px rgba(10, 10, 12, 0.8);
+        }
+        .timeline-item h4 {
+            font-family: var(--font-display);
+            font-size: 1rem;
+            color: var(--text);
+            margin-bottom: 4px;
+        }
+        .timeline-item p {
+            color: var(--muted);
+            font-size: 0.85rem;
+            line-height: 1.6;
+        }
+
+        /* ── Challenges ── */
+        .challenge-grid {
+            position: relative;
+            z-index: 2;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+        .challenge-col h3 {
+            font-family: var(--font-display);
+            font-size: 1.05rem;
+            color: var(--blue-light);
+            margin-bottom: 18px;
+        }
+        .challenge-card {
+            padding: 20px;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.02);
+            margin-bottom: 14px;
+        }
+        .challenge-card .tag {
+            display: inline-block;
+            font-family: var(--font-mono);
+            font-size: 0.64rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            padding: 3px 10px;
+            border-radius: 999px;
+            margin-bottom: 10px;
+        }
+        .challenge-card .tag.problem {
+            color: #e0a05a;
+            background: rgba(224, 160, 90, 0.1);
+        }
+        .challenge-card .tag.fix {
+            color: var(--blue-light);
+            background: rgba(74, 143, 216, 0.1);
+        }
+        .challenge-card p {
+            color: var(--soft);
+            font-size: 0.86rem;
+            line-height: 1.65;
+        }
+
+        /* ── Wiring table ── */
+        .wire-table {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            border-collapse: collapse;
+            margin: 22px 0;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+        }
+        .wire-table th,
+        .wire-table td {
+            text-align: left;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+        }
+        .wire-table th {
+            color: var(--blue-light);
+            text-transform: uppercase;
+            font-size: 0.68rem;
+            letter-spacing: 0.08em;
+        }
+        .wire-table td {
+            color: var(--soft);
+        }
+
+        /* ── Code block ── */
+        .code-block {
+            position: relative;
+            z-index: 2;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 18px 20px;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: #8fd0a0;
+            overflow-x: auto;
+            margin: 18px 0;
+            line-height: 1.7;
+            white-space: pre-wrap;
+        }
+        .code-block .cmt {
+            color: var(--muted);
+        }
+
+        /* ── Chip list ── */
+        .chip-list {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .chip {
+            padding: 8px 16px;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.02);
+            font-family: var(--font-mono);
+            font-size: 0.78rem;
+            color: var(--soft);
+        }
+
+        /* ── Results ── */
+        .result-row {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        .result-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 24px;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.03);
+            color: var(--blue-light);
+            font-family: var(--font-mono);
+            font-size: 0.82rem;
+            transition: all 0.3s ease;
+        }
+        .result-btn:hover {
+            border-color: rgba(74, 143, 216, 0.4);
+            background: rgba(74, 143, 216, 0.08);
+            transform: translateY(-2px);
+        }
+        .detect-sample {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 22px;
+        }
+        .detect-tag {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            padding: 8px 14px;
+            border-radius: 10px;
+            border: 1px solid rgba(74, 143, 216, 0.25);
+            color: var(--blue-light);
+            background: rgba(74, 143, 216, 0.06);
+        }
+
+        /* ── Conclusion ── */
+        .pull-quote {
+            position: relative;
+            z-index: 2;
+            font-family: var(--font-display);
+            font-size: clamp(1.25rem, 2vw, 1.6rem);
+            line-height: 1.55;
+            color: var(--text);
+            max-width: 880px;
+            padding-left: 24px;
+            border-left: 2px solid var(--blue-accent);
+        }
+        .credits {
+            position: relative;
+            z-index: 2;
+            margin-top: 34px;
+            display: flex;
+            gap: 32px;
+            flex-wrap: wrap;
+        }
+        .credit strong {
+            display: block;
+            font-family: var(--font-body);
+            font-size: 0.92rem;
+            color: var(--soft);
+            margin-bottom: 2px;
+        }
+        .credit span {
+            font-family: var(--font-mono);
+            font-size: 0.76rem;
+            color: var(--muted);
+        }
+
+        /* ── Report section responsive ── */
+        @media (max-width: 1100px) {
+            .section-card {
+                padding: 48px 32px;
+                border-radius: 28px;
+            }
+            .component-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .stat-row {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .build-layout {
+                grid-template-columns: 1fr;
+                gap: 28px;
+            }
+            .build-nav {
+                position: static;
+                flex-direction: row;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+            .build-nav button {
+                border-left: none;
+                border-bottom: 2px solid transparent;
+                padding: 8px 4px;
+            }
+            .build-nav button.active {
+                border-bottom-color: var(--blue-accent);
+            }
+        }
+        @media (max-width: 840px) {
+            .challenge-grid {
+                grid-template-columns: 1fr;
+            }
+            .component-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        @media (max-width: 640px) {
+            .section-card {
+                padding: 36px 20px;
+                border-radius: 22px;
+            }
+            .stat-row {
+                grid-template-columns: 1fr 1fr;
+            }
+            .timeline {
+                padding-left: 26px;
+            }
+            .timeline-item {
+                padding-left: 22px;
+            }
+            .timeline-item::before {
+                left: -31px;
+            }
+        }
+        /* ── Media split (text + photo slot) ── */
+        .media-split {
+            position: relative;
+            z-index: 2;
+            display: grid;
+            grid-template-columns: 1fr 760px;
+            gap: 44px;
+            align-items: start;
+        }
+        .media-split.media-left {
+            grid-template-columns: 760px 1fr;
+        }
+        .media-split.media-left .media-frame {
+            order: -1;
+        }
+        .media-split .media-content {
+            min-width: 0;
+        }
+
+        /* ── Media frame — horizontal (landscape) on desktop ── */
+        .media-frame {
+            position: sticky;
+            top: 110px;
+            aspect-ratio: 16 / 9;
+            border: 1px dashed rgba(255, 255, 255, 0.14);
+            background: rgba(255, 255, 255, 0.02);
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            will-change: transform, opacity;
+            border-radius: 24px;
+        }
+        .media-frame img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .media-frame .media-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            padding: 24px;
+            text-align: center;
+            color: var(--muted);
+        }
+        .media-frame .media-placeholder svg {
+            width: 34px;
+            height: 34px;
+            opacity: 0.4;
+            stroke: var(--blue-light);
+        }
+        .media-frame .media-placeholder span {
+            font-family: var(--font-mono);
+            font-size: 0.72rem;
+            letter-spacing: 0.05em;
+            line-height: 1.6;
+        }
+
+        /* ── Scroll‑reveal for media frames — CORNER SLIDE, reversible ── */
+        .media-frame.reveal-slide {
+            opacity: 0;
+            transition:
+                opacity 0.9s cubic-bezier(0.34, 1.2, 0.64, 1),
+                transform 0.9s cubic-bezier(0.34, 1.2, 0.64, 1);
+            transition-delay: calc(var(--d, 0) * 90ms);
+        }
+
+        /* ── from-left: slides in from the far bottom-left corner of the viewport ── */
+        .media-frame.reveal-slide.from-left {
+            transform: translate(-60vw, 40vh) scale(0.85) rotate(-4deg);
+        }
+        .media-frame.reveal-slide.from-left.is-visible {
+            opacity: 1;
+            transform: translate(0, 0) scale(1) rotate(0deg);
+        }
+
+        /* ── from-right: slides in from the far top-right corner of the viewport ── */
+        .media-frame.reveal-slide.from-right {
+            transform: translate(60vw, -40vh) scale(0.85) rotate(4deg);
+        }
+        .media-frame.reveal-slide.from-right.is-visible {
+            opacity: 1;
+            transform: translate(0, 0) scale(1) rotate(0deg);
+        }
+
+        /* ── from-bottom: kept as fallback ── */
+        .media-frame.reveal-slide.from-bottom {
+            transform: translateY(70px) scale(0.92);
+        }
+        .media-frame.reveal-slide.from-bottom.is-visible {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        /* ── media-left variant: image sits on the left, so mirror the corner it flies from ── */
+        .media-split.media-left .media-frame.reveal-slide.from-right {
+            transform: translate(60vw, -40vh) scale(0.85) rotate(4deg);
+        }
+        .media-split.media-left .media-frame.reveal-slide.from-right.is-visible {
+            transform: translate(0, 0) scale(1) rotate(0deg);
+        }
+        .media-split.media-left .media-frame.reveal-slide.from-left {
+            transform: translate(-60vw, 40vh) scale(0.85) rotate(-4deg);
+        }
+        .media-split.media-left .media-frame.reveal-slide.from-left.is-visible {
+            transform: translate(0, 0) scale(1) rotate(0deg);
+        }
+
+        @media (max-width: 1000px) {
+            .media-split,
+            .media-split.media-left {
+                grid-template-columns: 1fr;
+            }
+            .media-split.media-left .media-frame {
+                order: 0;
+            }
+            .media-frame {
+                position: static;
+                aspect-ratio: 16 / 9;
+                margin-bottom: 10px;
+            }
+            /* On mobile, all slide from bottom-center to keep things simple */
+            .media-frame.reveal-slide.from-left,
+            .media-frame.reveal-slide.from-right,
+            .media-frame.reveal-slide.from-bottom {
+                transform: translateY(60px) scale(0.92) rotate(0deg);
+            }
+            .media-frame.reveal-slide.is-visible {
+                transform: translateY(0) scale(1) rotate(0deg);
+            }
+            .media-split.media-left .media-frame.reveal-slide.from-right,
+            .media-split.media-left .media-frame.reveal-slide.from-left {
+                transform: translateY(60px) scale(0.92) rotate(0deg);
+            }
+            .media-split.media-left .media-frame.reveal-slide.from-right.is-visible,
+            .media-split.media-left .media-frame.reveal-slide.from-left.is-visible {
+                transform: translateY(0) scale(1) rotate(0deg);
+            }
         }
     </style>
 </head>
 <body>
+
+    <!-- Scroll progress -->
+    <div class="scroll-progress"><div class="scroll-progress__bar"></div></div>
 
     <!-- Floating blobs -->
     <div class="blob blob--1"></div>
@@ -1018,18 +1775,19 @@
             <!-- ===== LEFT PANEL ===== -->
             <section class="content-panel">
                 <div class="eyebrow">
-                    <span class="dot"></span> Rotating Showcase
+                    <span class="dot"></span> IIT Guwahati Internship
                 </div>
-                <h1>Images that <em>spin</em> around</h1>
+                <h1>Autonomous <em>drones</em>, built from scratch</h1>
                 <p>
-                    A mesmerizing rotating image carousel where four corner photos
-                    orbit around a central hero image. Hover to pause the rotation.
+                    A research internship at IIT Guwahati spent assembling multi-rotor
+                    drones, configuring Pixhawk and Cube Orange flight controllers, and
+                    wiring a Raspberry Pi 4 into the loop for real-time vision.
                 </p>
                 <p style="font-size:0.88rem; max-width:440px;">
-                    Each corner photo spins in place while orbiting the center,
-                    creating a dynamic, eye-catching visual experience.
+                    The result: a follower drone that autonomously detects and tracks
+                    a manually piloted leader drone using onboard object detection.
                 </p>
-                <div class="note">↻ Continuous spin &bull; <span>4 rotating corners</span></div>
+                <div class="note">↻ Leader–Follower architecture &bull; <span>YOLOv8 + MAVLink</span></div>
             </section>
 
             <!-- ===== RIGHT PANEL ===== -->
@@ -1075,6 +1833,390 @@
         </div>
 
     </main>
+
+    <!-- ===== REPORT: OVERVIEW ===== -->
+    <section class="section-card">
+        <div class="section-head reveal">
+            <div class="eyebrow"><span class="dot"></span> IIT Guwahati Research Internship</div>
+            <h2>Building an <em>autonomous</em> leader–follower drone</h2>
+            <p>
+                A research internship at the Department of Electrical and Electronics
+                Engineering, IIT Guwahati, focused on assembling multi-rotor drone
+                hardware, configuring professional-grade flight controllers, and
+                implementing vision-based autonomy on a Raspberry Pi companion
+                computer — culminating in a drone that autonomously tracks and
+                follows another drone in flight.
+            </p>
+        </div>
+
+        <div class="stat-row">
+            <div class="stat reveal" style="--d:0">
+                <strong>2</strong>
+                <span>Flight controllers configured — Pixhawk &amp; Cube Orange</span>
+            </div>
+            <div class="stat reveal" style="--d:1">
+                <strong>YOLOv8</strong>
+                <span>Onboard object detection running on a Raspberry Pi 4</span>
+            </div>
+            <div class="stat reveal" style="--d:2">
+                <strong>TELEM2</strong>
+                <span>UART / MAVLink bridge between Pi and Cube Orange</span>
+            </div>
+            <div class="stat reveal" style="--d:3">
+                <strong>3</strong>
+                <span>Engineers — Ariyan Nath, Chandan Chetia, MD Sohail Ali</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== REPORT: HARDWARE COMPONENTS ===== -->
+    <section class="section-card">
+        <div class="section-head reveal">
+            <div class="eyebrow"><span class="dot"></span> Hardware Setup</div>
+            <h2>Nine components, one <em>flying</em> system</h2>
+            <p>
+                A modular build — structural frame, propulsion, power, flight
+                control, and an onboard companion computer for perception — chosen
+                for ease of assembly, debugging, and future scalability.
+            </p>
+        </div>
+
+        <div class="component-grid">
+            <div class="component-card reveal" style="--d:0">
+                <span class="num">01</span>
+                <h3>Drone Frame</h3>
+                <p>Structural base for all motors, sensors, and electronics — providing mechanical stability and proper weight distribution.</p>
+            </div>
+            <div class="component-card reveal" style="--d:1">
+                <span class="num">02</span>
+                <h3>BLDC Motors &amp; Propellers</h3>
+                <p>Brushless motors paired with sized propellers to generate lift and thrust for efficient, stable propulsion.</p>
+            </div>
+            <div class="component-card reveal" style="--d:2">
+                <span class="num">03</span>
+                <h3>Electronic Speed Controllers</h3>
+                <p>One ESC per motor, regulating speed from flight-controller signals for precise thrust control.</p>
+            </div>
+            <div class="component-card reveal" style="--d:0">
+                <span class="num">04</span>
+                <h3>PDB &amp; LiPo Battery</h3>
+                <p>The Power Distribution Board fed regulated power from a Li-Po battery to ESCs, flight controller, and electronics.</p>
+            </div>
+            <div class="component-card reveal" style="--d:1">
+                <span class="num">05</span>
+                <h3>Pixhawk Flight Controller</h3>
+                <p>Central processing unit handling sensor fusion, stabilisation, navigation, and control algorithms.</p>
+            </div>
+            <div class="component-card reveal" style="--d:2">
+                <span class="num">06</span>
+                <h3>Cube Orange Flight Controller</h3>
+                <p>The primary autopilot used for the leader–follower build — interfaced directly with the Raspberry Pi over TELEM2.</p>
+            </div>
+            <div class="component-card reveal" style="--d:0">
+                <span class="num">07</span>
+                <h3>Telemetry Module</h3>
+                <p>Radios for real-time, bidirectional communication with the Ground Control Station via Mission Planner.</p>
+            </div>
+            <div class="component-card reveal" style="--d:1">
+                <span class="num">08</span>
+                <h3>Raspberry Pi 4</h3>
+                <p>Onboard companion computer for real-time video processing, object detection, and autonomous decision-making.</p>
+            </div>
+            <div class="component-card reveal" style="--d:2">
+                <span class="num">09</span>
+                <h3>Camera Module</h3>
+                <p>A webcam connected to the Pi to capture the live video feed used for object detection and tracking.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== REPORT: BUILD PROCESS (scrollytelling) ===== -->
+    <section class="section-card">
+        <div class="section-head reveal">
+            <div class="eyebrow"><span class="dot"></span> Assembly &amp; Integration</div>
+            <h2>From bare frame to <em>wired</em> autopilot</h2>
+            <p>Five stages of hardware integration, each verified before moving to the next — motors first, autonomy last.</p>
+        </div>
+
+        <div class="build-layout">
+            <nav class="build-nav">
+                <button data-target="step-1" class="active">01 · Frame &amp; Propulsion</button>
+                <button data-target="step-2">02 · Flight Controller</button>
+                <button data-target="step-3">03 · Power Integration</button>
+                <button data-target="step-4">04 · Telemetry Link</button>
+                <button data-target="step-5">05 · Companion Computer</button>
+            </nav>
+
+            <div class="build-steps">
+                <div class="build-step scroll-scale" id="step-1" data-step="step-1">
+                    <span class="step-num">STEP 01</span>
+                    <h3>Frame &amp; Propulsion</h3>
+                    <p>Assembly began with mounting the motors and ESCs onto the drone frame. ESCs were connected to the motors and routed to the Power Distribution Board, with care taken over insulation and secure wiring to prevent electrical interference and mechanical damage.</p>
+                </div>
+                <div class="build-step scroll-scale" id="step-2" data-step="step-2">
+                    <span class="step-num">STEP 02</span>
+                    <h3>Flight Controller Mount</h3>
+                    <p>The Pixhawk / Cube Orange was mounted at the frame's centre using vibration-damping mounts to minimise sensor noise, with orientation aligned to manufacturer specifications for accurate attitude estimation.</p>
+                </div>
+                <div class="build-step scroll-scale" id="step-3" data-step="step-3">
+                    <span class="step-num">STEP 03</span>
+                    <h3>Power Integration</h3>
+                    <p>The battery and power module were integrated to supply regulated power to the flight controller and peripherals. Every power connection was verified with a multimeter before the system was first energised.</p>
+                </div>
+                <div class="build-step scroll-scale" id="step-4" data-step="step-4">
+                    <span class="step-num">STEP 04</span>
+                    <h3>Telemetry Link</h3>
+                    <p>The telemetry module was connected to the flight controller to enable bidirectional communication with the Ground Control Station, allowing real-time monitoring of flight parameters through Mission Planner.</p>
+                </div>
+                <div class="build-step scroll-scale" id="step-5" data-step="step-5">
+                    <span class="step-num">STEP 05</span>
+                    <h3>Companion Computer</h3>
+                    <p>The Raspberry Pi 4 was mounted securely with a forward-facing webcam and powered from a regulated power bank. Its GPIO pins were then wired to the Cube Orange's TELEM2 port — TX, RX, and GND — for MAVLink-based serial communication.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== REPORT: CALIBRATION TIMELINE ===== -->
+    <section class="section-card">
+        <div class="section-head reveal">
+            <div class="eyebrow"><span class="dot"></span> Drone Calibration</div>
+            <h2>Twelve checks in <em>Mission Planner</em></h2>
+            <p>Every calibration pass ran through Mission Planner as the Ground Control Station, connected via telemetry or USB — from firmware verification to a validated test flight.</p>
+        </div>
+
+        <div class="media-split">
+            <div class="media-content">
+                <div class="timeline">
+                    <div class="timeline-track"></div>
+
+                    <div class="timeline-item reveal" style="--d:0">
+                        <h4>Connect &amp; verify</h4>
+                        <p>Power on the drone and GCS, connect the flight controller to Mission Planner, and confirm firmware and board configuration.</p>
+                    </div>
+                    <div class="timeline-item reveal" style="--d:1">
+                        <h4>Accelerometer calibration</h4>
+                        <p>Place the drone in six orientations and record sensor offsets.</p>
+                    </div>
+                    <div class="timeline-item reveal" style="--d:2">
+                        <h4>Compass calibration</h4>
+                        <p>Rotate the drone along all axes, away from magnetic interference.</p>
+                    </div>
+                    <div class="timeline-item reveal" style="--d:0">
+                        <h4>Radio calibration</h4>
+                        <p>Calibrate throttle, roll, pitch, and yaw, and assign auxiliary switches.</p>
+                    </div>
+                    <div class="timeline-item reveal" style="--d:1">
+                        <h4>ESC calibration</h4>
+                        <p>Synchronise the throttle range for a uniform response across all motors.</p>
+                    </div>
+                    <div class="timeline-item reveal" style="--d:2">
+                        <h4>GPS verification</h4>
+                        <p>Confirm satellite count, fix type, and HDOP before flight.</p>
+                    </div>
+                    <div class="timeline-item reveal" style="--d:0">
+                        <h4>Failsafe &amp; safety parameters</h4>
+                        <p>Configure battery failsafe, RC failsafe, and arming checks.</p>
+                    </div>
+                    <div class="timeline-item reveal" style="--d:1">
+                        <h4>Flight modes &amp; pre-flight checks</h4>
+                        <p>Assign Stabilise, Loiter, RTL, and Auto-tune, then verify motor direction, propeller orientation, and sensor health.</p>
+                    </div>
+                    <div class="timeline-item reveal" style="--d:2">
+                        <h4>Test flight &amp; validation</h4>
+                        <p>A successful test flight confirmed the drone was properly calibrated and ready for autonomous experiments.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Image on the right — slides from top-right corner -->
+            <div class="media-frame reveal-slide from-right" style="--d:0">
+                <img src="./images/mission-planner.png" alt="Mission Planner calibration screen">
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== REPORT: CHALLENGES ===== -->
+    <section class="section-card">
+        <div class="section-head reveal">
+            <div class="eyebrow"><span class="dot"></span> Problems &amp; Fixes</div>
+            <h2>Where things went <em>wrong</em> — and how they got fixed</h2>
+            <p>Troubleshooting hardware, connectivity, and networking issues did more for practical understanding than any tutorial could.</p>
+        </div>
+
+        <div class="challenge-grid">
+            <div class="challenge-col reveal" style="--d:0">
+                <h3>Hardware &amp; Flight Controller</h3>
+                <div class="challenge-card">
+                    <span class="tag problem">Problem</span>
+                    <p>Sparse documentation for the Cube Orange meant small but critical configuration parameters weren't explained anywhere obvious.</p>
+                </div>
+                <div class="challenge-card">
+                    <span class="tag fix">Fix</span>
+                    <p>Extensive experimentation and cross-referencing official documentation to fill the gaps.</p>
+                </div>
+                <div class="challenge-card">
+                    <span class="tag problem">Problem</span>
+                    <p>Mission Planner intermittently failed to hold a stable connection, lagging or freezing mid-calibration.</p>
+                </div>
+                <div class="challenge-card">
+                    <span class="tag fix">Fix</span>
+                    <p>Repeated reconnections and restarts to recover a clean session.</p>
+                </div>
+                <div class="challenge-card">
+                    <span class="tag problem">Problem</span>
+                    <p>The receiver ignored radio input during calibration.</p>
+                </div>
+                <div class="challenge-card">
+                    <span class="tag fix">Fix</span>
+                    <p>Traced to improper transmitter–receiver binding — re-binding resolved it.</p>
+                </div>
+            </div>
+
+            <div class="challenge-col reveal" style="--d:1">
+                <h3>Raspberry Pi &amp; Remote Access</h3>
+                <div class="challenge-card">
+                    <span class="tag problem">Problem</span>
+                    <p>No remote access to the Pi in the initial setup phase.</p>
+                </div>
+                <div class="challenge-card">
+                    <span class="tag fix">Fix</span>
+                    <p>SSH and Raspberry Pi Connect, locating the Pi with <code>ping hostname.local</code> — both devices had to share a network.</p>
+                </div>
+                <div class="challenge-card">
+                    <span class="tag problem">Problem</span>
+                    <p>On USB-C power-up, the Pi sometimes forgot its Wi-Fi credentials and lost internet access, blocking SSH entirely.</p>
+                </div>
+                <div class="challenge-card">
+                    <span class="tag fix">Fix</span>
+                    <p>Reinstalling the OS repeatedly was too slow. Removing the password and running the target network open resolved the reconnection issue for good.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== REPORT: LEADER-FOLLOWER ARCHITECTURE ===== -->
+    <section class="section-card">
+        <div class="section-head reveal">
+            <div class="eyebrow"><span class="dot"></span> Leader–Follower Setup</div>
+            <h2>One drone <em>watches</em>, one drone <em>follows</em></h2>
+            <p>
+                Two drones fly simultaneously with distinct roles: a manually piloted
+                Leader providing a dynamic target, and an autonomous Follower that
+                processes visual data to maintain relative position — no direct
+                human control of the follower required.
+            </p>
+        </div>
+
+        <table class="wire-table reveal">
+            <thead>
+                <tr><th>Cube Orange (TELEM2)</th><th>Raspberry Pi GPIO</th></tr>
+            </thead>
+            <tbody>
+                <tr><td>GND</td><td>GPIO Pin 9</td></tr>
+                <tr><td>TX</td><td>GPIO Pin 10</td></tr>
+                <tr><td>RX</td><td>GPIO Pin 8</td></tr>
+            </tbody>
+        </table>
+
+        <div class="code-block reveal"><span class="cmt"># verify the MAVLink bridge over TELEM2</span>
+            mavproxy.py --master=/dev/serial0 --baudrate 57600 --out=udp:127.0.0.1:14550</div>
+
+        <p style="color:var(--muted); line-height:1.75; font-size:0.92rem; max-width:720px; position:relative; z-index:2;" class="reveal">
+            With UART communication confirmed, a <code>drone_pursuit.py</code> script tied it
+            all together: a colour-blob tracker locates the leader in each frame, estimates
+            distance from its apparent size, and streams velocity + yaw-rate commands to the
+            Cube Orange over MAVLink — auto-arming, switching to <code>GUIDED_NOGPS</code>,
+            taking off on first detection, and closing the gap while keeping the target centred.
+        </p>
+    </section>
+
+    <!-- ===== REPORT: SOFTWARE STACK ===== -->
+    <section class="section-card">
+        <div class="section-head reveal">
+            <div class="eyebrow"><span class="dot"></span> Vision &amp; Software</div>
+            <h2>Detection running <em>onboard</em>, streamed live</h2>
+            <p>
+                Before wiring detection into flight control, the pipeline was validated
+                independently: a YOLOv8n model reading frames from the webcam, with
+                results pushed out as a low-lag MJPEG stream over the Pi's own HTTP server.
+            </p>
+        </div>
+
+        <!-- Image on the left — slides in from the right -->
+        <div class="media-split media-left">
+            <div class="media-frame reveal-slide from-right" style="--d:0">
+                <img src="./images/pi-laptop.jpeg" alt="Raspberry Pi setup">
+            </div>
+
+            <div class="media-content">
+                <div class="chip-list reveal">
+                    <span class="chip">Python 3</span>
+                    <span class="chip">OpenCV</span>
+                    <span class="chip">Ultralytics YOLOv8</span>
+                    <span class="chip">MAVProxy</span>
+                    <span class="chip">pymavlink</span>
+                    <span class="chip">imutils</span>
+                    <span class="chip">Mission Planner</span>
+                    <span class="chip">SSH / Raspberry Pi Connect</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== REPORT: RESULTS ===== -->
+    <section class="section-card">
+        <div class="section-head reveal">
+            <div class="eyebrow"><span class="dot"></span> Results</div>
+            <h2>What the <em>webcam</em> saw</h2>
+            <p>Live inference on the companion computer picked up objects mid-frame with high confidence — the same pipeline later repointed at the leader drone in flight.</p>
+        </div>
+
+        <!-- Image on the right — slides from top-right corner -->
+        <div class="media-split">
+            <div class="media-content">
+                <div class="detect-sample reveal">
+                    <span class="detect-tag">person · 0.92</span>
+                    <span class="detect-tag">backpack · 0.78</span>
+                    <span class="detect-tag">laptop · 0.72</span>
+                </div>
+
+                <div class="result-row reveal" style="margin-top:26px;">
+                    <a class="result-btn" href="https://drive.google.com/drive/folders/1old65274a7uVKUZfbL-ukDCEAQpRBQ4R?usp=sharing" target="_blank" rel="noreferrer">▶ Video Gallery</a>
+                    <a class="result-btn" href="https://drive.google.com/drive/folders/1HSGzTEuW3mnSMV13_brZm7Uf3fvJ2qJY?usp=sharing" target="_blank" rel="noreferrer">🖼 Photo Gallery</a>
+                </div>
+            </div>
+
+            <div class="media-frame reveal-slide from-right" style="--d:0">
+                <img src="./images/object-detection.jpeg" alt="YOLO detection output">
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== REPORT: CONCLUSION ===== -->
+    <section class="section-card">
+        <div class="section-head reveal">
+            <div class="eyebrow"><span class="dot"></span> Conclusion</div>
+            <h2>Theory, <em>wired</em> into a working system</h2>
+        </div>
+
+        <p class="pull-quote reveal">
+            "Vision-based autonomous drone following is achievable on low-cost embedded
+            hardware and open-source flight software — a foundation for future work in
+            multi-drone coordination and swarm robotics."
+        </p>
+
+        <div class="credits reveal" style="--d:1">
+            <div class="credit"><strong>Ariyan Nath</strong><span>2nd Year, EEE</span></div>
+            <div class="credit"><strong>Chandan Chetia</strong><span>2nd Year, EEE</span></div>
+            <div class="credit"><strong>MD Sohail Ali</strong><span>2nd Year, EEE</span></div>
+        </div>
+
+        <p class="reveal" style="--d:2; color:var(--muted); font-size:0.82rem; margin-top:28px; position:relative; z-index:2;">
+            With thanks to Professor Dr. Chayan Bhawal for guidance throughout, to PhD scholar
+            Paraj Ganchaudhuri for constant technical support, and to IIT Guwahati for the opportunity.
+        </p>
+    </section>
 
     <!-- ===== FOOTER ===== -->
     <footer class="footer">
@@ -1167,6 +2309,118 @@
                 document.body.style.overflow = '';
             });
         });
+
+        // ── Scroll progress bar ──
+        const progressBar = document.querySelector('.scroll-progress__bar');
+
+        function updateProgress() {
+            const scrollTop = window.scrollY;
+            const height = document.documentElement.scrollHeight - window.innerHeight;
+            const pct = height > 0 ? scrollTop / height : 0;
+            if (progressBar) progressBar.style.transform = `scaleX(${pct})`;
+        }
+
+        // ── One-shot reveal on scroll (standard .reveal) ──
+        const revealEls = document.querySelectorAll('.reveal');
+        if ('IntersectionObserver' in window) {
+            const revealObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                        revealObserver.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.15, rootMargin: '0px 0px -8% 0px' });
+            revealEls.forEach(el => revealObserver.observe(el));
+        } else {
+            revealEls.forEach(el => el.classList.add('is-visible'));
+        }
+
+        // ── Slide‑reveal for media frames — REVERSIBLE (plays back out on scroll-up) ──
+        const slideEls = document.querySelectorAll('.reveal-slide');
+        if ('IntersectionObserver' in window) {
+            const slideObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    // Toggle instead of a one-shot unobserve, so the fly-in
+                    // replays in reverse whenever the element leaves the
+                    // viewport (scrolling back up) and forward again when
+                    // it re-enters (scrolling back down).
+                    entry.target.classList.toggle('is-visible', entry.isIntersecting);
+                });
+            }, { threshold: 0.12, rootMargin: '0px 0px -6% 0px' });
+            slideEls.forEach(el => slideObserver.observe(el));
+        } else {
+            slideEls.forEach(el => el.classList.add('is-visible'));
+        }
+
+        // ── Continuous scroll-linked scale / fade (the "scrub" effect) ──
+        const scaleEls = document.querySelectorAll('.scroll-scale');
+
+        function updateScaleEls() {
+            const vh = window.innerHeight;
+            scaleEls.forEach(el => {
+                const r = el.getBoundingClientRect();
+                const center = r.top + r.height / 2;
+                const dist = Math.abs(center - vh / 2);
+                const progress = Math.max(0, 1 - dist / (vh * 0.7));
+                el.style.setProperty('--p', progress.toFixed(3));
+            });
+        }
+
+        // ── Timeline line fill ──
+        const timelineTrack = document.querySelector('.timeline-track');
+
+        function updateTimeline() {
+            if (!timelineTrack) return;
+            const parent = timelineTrack.parentElement;
+            const r = parent.getBoundingClientRect();
+            const vh = window.innerHeight;
+            const total = r.height;
+            const visible = Math.min(Math.max(vh * 0.65 - r.top, 0), total);
+            const pct = total > 0 ? (visible / total) * 100 : 0;
+            timelineTrack.style.setProperty('--fill', pct + '%');
+        }
+
+        // ── Sticky build-nav: highlight step in view, click to jump ──
+        const buildSteps = document.querySelectorAll('.build-step');
+        const buildNavBtns = document.querySelectorAll('.build-nav button');
+        if (buildSteps.length && 'IntersectionObserver' in window) {
+            const stepObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const id = entry.target.getAttribute('data-step');
+                        buildNavBtns.forEach(btn => {
+                            btn.classList.toggle('active', btn.getAttribute('data-target') === id);
+                        });
+                    }
+                });
+            }, { threshold: 0, rootMargin: '-45% 0px -45% 0px' });
+            buildSteps.forEach(step => stepObserver.observe(step));
+        }
+        buildNavBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const target = document.getElementById(btn.getAttribute('data-target'));
+                if (target) target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            });
+        });
+
+        // ── rAF-throttled scroll loop ──
+        let ticking = false;
+
+        function onScrollUpdate() {
+            if (!ticking) {
+                requestAnimationFrame(() => {
+                    updateProgress();
+                    updateScaleEls();
+                    updateTimeline();
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        }
+        window.addEventListener('scroll', onScrollUpdate, { passive: true });
+        window.addEventListener('resize', onScrollUpdate);
+        onScrollUpdate();
     </script>
 
 </body>
