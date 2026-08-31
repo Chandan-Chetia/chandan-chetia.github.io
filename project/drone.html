@@ -1636,22 +1636,22 @@
             transition-delay: calc(var(--d, 0) * 90ms);
         }
 
-        /* ── from-left: slides in from the far bottom-left corner of the viewport ── */
+        /* ── from-left: slide in from the outer left edge, but stay close enough to remain visible ── */
         .media-frame.reveal-slide.from-left {
-            transform: translate(-60vw, 40vh) scale(0.85) rotate(-4deg);
+            transform: translate3d(-120px, 24px, 0) scale(0.96) rotate(-4deg);
         }
         .media-frame.reveal-slide.from-left.is-visible {
             opacity: 1;
-            transform: translate(0, 0) scale(1) rotate(0deg);
+            transform: translate3d(0, 0, 0) scale(1) rotate(0deg);
         }
 
-        /* ── from-right: slides in from the far top-right corner of the viewport ── */
+        /* ── from-right: slide in from the outer right edge, but stay close enough to remain visible ── */
         .media-frame.reveal-slide.from-right {
-            transform: translate(60vw, -40vh) scale(0.85) rotate(4deg);
+            transform: translate3d(120px, -24px, 0) scale(0.96) rotate(4deg);
         }
         .media-frame.reveal-slide.from-right.is-visible {
             opacity: 1;
-            transform: translate(0, 0) scale(1) rotate(0deg);
+            transform: translate3d(0, 0, 0) scale(1) rotate(0deg);
         }
 
         /* ── from-bottom: kept as fallback ── */
@@ -1663,18 +1663,18 @@
             transform: translateY(0) scale(1);
         }
 
-        /* ── media-left variant: image sits on the left, so mirror the corner it flies from ── */
+        /* ── media-left variant: same side-entry idea, but with a smaller offset so the image stays visible ── */
         .media-split.media-left .media-frame.reveal-slide.from-right {
-            transform: translate(60vw, -40vh) scale(0.85) rotate(4deg);
+            transform: translate3d(120px, 24px, 0) scale(0.96) rotate(4deg);
         }
         .media-split.media-left .media-frame.reveal-slide.from-right.is-visible {
-            transform: translate(0, 0) scale(1) rotate(0deg);
+            transform: translate3d(0, 0, 0) scale(1) rotate(0deg);
         }
         .media-split.media-left .media-frame.reveal-slide.from-left {
-            transform: translate(-60vw, 40vh) scale(0.85) rotate(-4deg);
+            transform: translate3d(-120px, -24px, 0) scale(0.96) rotate(-4deg);
         }
         .media-split.media-left .media-frame.reveal-slide.from-left.is-visible {
-            transform: translate(0, 0) scale(1) rotate(0deg);
+            transform: translate3d(0, 0, 0) scale(1) rotate(0deg);
         }
 
         @media (max-width: 1000px) {
