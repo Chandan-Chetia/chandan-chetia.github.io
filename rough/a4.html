@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liquid Glass Hero — Premium Entrance Animation</title>
+    <style>
+        /* ============================================================
+               CSS VARIABLES — Edit these to customize the entire look
+               ============================================================ */
+        :root {
+            /* -- Animation timing & motion -- */
+            /* Total duration of the entrance animation */
+            --animation-duration: 1.8s;
+            /* Premium spring-like easing curve */
+            --animation-easing: cubic-bezier(.16, 1, .3, 1);
+            /* Starting horizontal position (relative to card width).
+               More negative = starts further left, outside the animation area. */
+            --start-translate-x: -160%;
+            /* Starting 3D Y-axis rotation in degrees.
+               Larger = more dramatic initial 3D angle. */
+            --start-rotate-y: 28deg;
+            /* Starting scale (slightly smaller for depth feel). */
+            --start-scale: 0.82;
+            /* Overshoot amount — how far past the final position it briefly goes. */
+            --overshoot-x: 2.2%;
+
+            /* -- Layout & sizing -- */
+            /* Desktop column split: left content / right animation */
+            --left-col-width: 45%;
+            --right-col-width: 55%;
+            /* Maximum width of the entire hero container */
+            --hero-max-width: 1280px;
+            /* Image card aspect ratio (width / height) */
+            --image-aspect-ratio: 4 / 3;
+            /* Image card maximum width within the animation area */
+            --image-max-width: 560px;
+            /* Image card border radius */
+            --border-radius-card: 22px;
+            --border-radius-sm: 10px;
+
+            /* -- Colors — black-blue liquid-glass palette -- */
+            --bg-primary: #06060c; /* Main near-black background */
+            --bg-secondary: #0a0a14; /* Slightly lighter black-blue */
+            --glass-bg: rgba(255, 255, 255, 0.025); /* Glass card background */
+            --glass-border: rgba(255, 255, 255, 0.08); /* Translucent border */
+            --glass-border-strong: rgba(255, 255, 255, 0.14); /* Slightly stronger border */
+            --glow-blue: rgba(59, 130, 246, 0.18); /* Ambient blue glow */
+            --glow-blue-strong: rgba(59, 130, 246, 0.35); /* Stronger glow for card */
+            --glow-blue-subtle: rgba(59, 130, 246, 0.08); /* Very subtle glow */
+            --text-primary: #f1f5f9; /* Heading / main text */
+            --text-secondary: #94a3b8; /* Muted paragraph text */
+            --text-tertiary: #64748b; /* Even more muted */
+            --accent-blue: #3b82f6; /* Primary accent */
+            --accent-blue-bright: #60a5fa; /* Brighter accent for hover */
+
+            /* -- 3D perspective depth -- */
+            --perspective-depth: 1400px;
+        }
+
+        /* ============================================================
+               RESET & BASE STYLES
+               ============================================================ */
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            overflow-x: hidden;
+            /* Prevent horizontal scrollbars from the animation overflow */
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', 'Helvetica Neue', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            /* Subtle ambient blue radial gradient behind the whole page */
+            background-image:
+                radial-gradient(ellipse at 85% 20%, rgba(30, 58, 110, 0.12) 0%, transparent 55%),
+                radial-gradient(ellipse at 60% 80%, rgba(15, 25, 50, 0.15) 0%, transparent 50%);
+        }
+
+        /* ============================================================
+               HERO SECTION LAYOUT
+               ============================================================ */
+        .hero {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 4rem 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero__container {
+            display: grid;
+            grid-template-columns: var(--left-col-width) var(--right-col-width);
+            gap: 3rem;
+            max-width: var(--hero-max-width);
+            width: 100%;
+            margin: 0 auto;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* ============================================================
+               LEFT COLUMN — Static Content
+               ============================================================ */
+        .hero__content {
+            /* Content stays completely static; no animation interferes here */
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1.5rem;
+            z-index: 10;
+            /* Ensure content is above any decorative elements */;
+        }
+
+        /* Badge — small pill-shaped glass element */
+        .hero__badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1.1rem;
+            border-radius: 100px;
+            background: rgba(59, 130, 246, 0.08);
+            border: 1px solid rgba(59, 130, 246, 0.18);
+            font-size: 0.75rem;
+            font-weight: 500;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--accent-blue-bright);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            /* Subtle glow */
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.06);
+        }
+
+        .hero__badge-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--accent-blue-bright);
+            box-shadow: 0 0 8px rgba(96, 165, 250, 0.6);
+            animation: badgePulse 2.5s ease-in-out infinite;
+        }
+
+        @keyframes badgePulse {
+            0%,
+            100% {
+                box-shadow: 0 0 4px rgba(96, 165, 250, 0.4);
+            }
+            50% {
+                box-shadow: 0 0 12px rgba(96, 165, 250, 0.8);
+            }
+        }
+
+        /* Heading — large, bold, premium */
+        .hero__heading {
+            font-size: clamp(2.4rem, 5vw, 3.8rem);
+            font-weight: 700;
+            line-height: 1.08;
+            letter-spacing: -0.03em;
+            color: var(--text-primary);
+            /* Subtle gradient text for premium feel */
+            background: linear-gradient(135deg, #f8fafc 55%, #94a3b8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 40px rgba(59, 130, 246, 0.1);
+        }
+
+        /* Paragraph — muted, readable */
+        .hero__paragraph {
+            font-size: 1.05rem;
+            line-height: 1.7;
+            color: var(--text-secondary);
+            max-width: 440px;
+            font-weight: 400;
+            letter-spacing: 0.01em;
+        }
+
+        /* Button — glass style with blue accent */
+        .hero__button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.85rem 1.8rem;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            color: #f8fafc;
+            cursor: pointer;
+            text-decoration: none;
+            /* Glass background */
+            background: rgba(59, 130, 246, 0.12);
+            border: 1px solid rgba(59, 130, 246, 0.25);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            /* Blue glow shadow */
+            box-shadow:
+                0 4px 24px rgba(59, 130, 246, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.06);
+            transition: all 0.35s var(--animation-easing);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Button hover effect — subtle lift and glow increase */
+        .hero__button:hover {
+            background: rgba(59, 130, 246, 0.2);
+            border-color: rgba(59, 130, 246, 0.45);
+            box-shadow:
+                0 8px 32px rgba(59, 130, 246, 0.25),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .hero__button:active {
+            transform: translateY(0);
+            box-shadow:
+                0 2px 12px rgba(59, 130, 246, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.06);
+        }
+
+        .hero__button-arrow {
+            transition: transform 0.3s var(--animation-easing);
+            font-size: 1.1rem;
+            line-height: 1;
+        }
+        .hero__button:hover .hero__button-arrow {
+            transform: translateX(3px);
+        }
+
+        /* ============================================================
+               RIGHT COLUMN — Animation Area
+               ============================================================ */
+        .hero__visual {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            min-height: 500px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            /* 3D perspective for the entrance rotation effect.
+               Edit --perspective-depth in :root to change the depth feel. */
+            perspective: var(--perspective-depth);
+            perspective-origin: center center;
+            /* Clips the image when it moves outside this column's bounds.
+               This is what keeps the animation from overlapping the left content. */
+            overflow: hidden;
+            /* Subtle blue radial glow behind the animation area */
+            background: radial-gradient(ellipse at 50% 50%, rgba(30, 50, 90, 0.18) 0%, transparent 70%);
+            border-radius: var(--border-radius-card);
+        }
+
+        /* ============================================================
+               AMBIENT GLOW — behind the image card
+               ============================================================ */
+        .hero__ambient-glow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 80%;
+            height: 70%;
+            transform: translate(-50%, -50%);
+            background: radial-gradient(ellipse at center,
+                    rgba(59, 130, 246, 0.13) 0%,
+                    rgba(30, 60, 130, 0.06) 40%,
+                    transparent 70%);
+            border-radius: 50%;
+            z-index: 1;
+            pointer-events: none;
+            /* Subtle pulse animation for life */
+            animation: ambientGlowPulse 6s ease-in-out infinite;
+        }
+
+        @keyframes ambientGlowPulse {
+            0%,
+            100% {
+                opacity: 0.9;
+                transform: translate(-50%, -50%) scale(1);
+            }
+            50% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1.05);
+            }
+        }
+
+        /* ============================================================
+               FLOATING GLASS ELEMENTS — subtle background decoration
+               ============================================================ */
+        .hero__float {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.05);
+            z-index: 2;
+            pointer-events: none;
+            /* Extremely low opacity for subtlety */
+            opacity: 0.3;
+        }
+
+        /* Each floating element has a unique size, position, and float speed */
+        .hero__float--1 {
+            width: 48px;
+            height: 48px;
+            top: 12%;
+            left: 8%;
+            animation: floatVertical 5.5s ease-in-out infinite;
+            animation-delay: 0s;
+        }
+        .hero__float--2 {
+            width: 28px;
+            height: 28px;
+            top: 68%;
+            left: 16%;
+            animation: floatVertical 7s ease-in-out infinite;
+            animation-delay: -1.8s;
+        }
+        .hero__float--3 {
+            width: 64px;
+            height: 64px;
+            top: 20%;
+            right: 10%;
+            animation: floatVertical 8s ease-in-out infinite;
+            animation-delay: -3.2s;
+        }
+        .hero__float--4 {
+            width: 20px;
+            height: 20px;
+            bottom: 15%;
+            right: 22%;
+            animation: floatVertical 6s ease-in-out infinite;
+            animation-delay: -0.7s;
+        }
+        .hero__float--5 {
+            width: 36px;
+            height: 36px;
+            top: 45%;
+            right: 6%;
+            animation: floatVertical 9s ease-in-out infinite;
+            animation-delay: -2.5s;
+        }
+
+        /* Slow vertical floating motion */
+        @keyframes floatVertical {
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-18px);
+            }
+        }
+
+        /* ============================================================
+               MAIN IMAGE CARD — Glass card with entrance animation
+               ============================================================ */
+        .hero__image-card {
+            position: relative;
+            z-index: 3;
+            width: 100%;
+            max-width: var(--image-max-width);
+            aspect-ratio: var(--image-aspect-ratio);
+            border-radius: var(--border-radius-card);
+            /* Glass card background — nearly transparent with subtle blue tint */
+            background: var(--glass-bg);
+            /* Translucent border for the glassmorphism effect */
+            border: 1px solid var(--glass-border);
+            /* Premium depth shadow + blue outer glow */
+            box-shadow:
+                0 30px 80px rgba(0, 0, 0, 0.55),
+                0 0 50px var(--glow-blue),
+                0 0 120px rgba(59, 130, 246, 0.06),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            /* Backdrop blur for the glass transparency effect */
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            /* Preserve 3D for children */
+            transform-style: preserve-3d;
+            /* ============================================================
+               ENTRANCE ANIMATION
+               The card starts far left of the animation area,
+               angled with rotateY(28deg) and slightly smaller scale.
+               It slides right into its final position with a subtle
+               overshoot, then settles perfectly.
+
+               EDIT THE VARIABLES IN :root TO CUSTOMIZE:
+               --start-translate-x : starting distance (more negative = further left)
+               --start-rotate-y    : initial 3D angle
+               --start-scale       : initial scale
+               --overshoot-x       : how far past final position to overshoot
+               --animation-duration: total time of the animation
+               --animation-easing  : easing curve
+               ============================================================ */
+            animation: heroEntrance var(--animation-duration) var(--animation-easing) forwards;
+            /* forwards = stay at final state after animation ends */;
+        }
+
+        /* --- ENTRANCE KEYFRAMES ---
+               Smooth left → right motion with 3D rotation settling.
+               The image starts far outside the visible animation area,
+               strongly rotated on the Y-axis for a 3D panel feel.
+               As it approaches the final position, the rotation reduces
+               to zero, the scale normalizes, and it overshoots slightly
+               before settling into place. */
+        @keyframes heroEntrance {
+            /* 0% — Starting position: far left, strongly rotated, smaller */
+            0% {
+                transform: translateX(var(--start-translate-x)) rotateY(var(--start-rotate-y)) scale(var(--start-scale));
+                opacity: 0.9;
+            }
+
+            /* 25% — Moving right, still angled, gaining speed */
+            25% {
+                transform: translateX(calc(var(--start-translate-x) * 0.45)) rotateY(calc(var(--start-rotate-y) * 0.75)) scale(calc(var(--start-scale) + 0.04));
+                opacity: 0.95;
+            }
+
+            /* 55% — Approaching final position, rotation noticeably reduced */
+            55% {
+                transform: translateX(calc(var(--overshoot-x) * 0.6)) rotateY(calc(var(--start-rotate-y) * 0.28)) scale(0.96);
+                opacity: 1;
+            }
+
+            /* 70% — Slight overshoot past the final position (spring-like) */
+            70% {
+                transform: translateX(var(--overshoot-x)) rotateY(3deg) scale(0.99);
+                opacity: 1;
+            }
+
+            /* 82% — Gentle rebound back toward the center */
+            82% {
+                transform: translateX(calc(var(--overshoot-x) * -0.35)) rotateY(0.5deg) scale(1);
+                opacity: 1;
+            }
+
+            /* 92% — Settling into place, virtually front-facing */
+            92% {
+                transform: translateX(calc(var(--overshoot-x) * 0.15)) rotateY(0deg) scale(1);
+                opacity: 1;
+            }
+
+            /* 100% — Final resting position: perfectly centered, front-facing */
+            100% {
+                transform: translateX(0) rotateY(0deg) scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* --- IMAGE INSIDE THE CARD --- */
+        .hero__image-card img {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: var(--border-radius-card);
+            /* The image sits inside the glass card */
+            display: block;
+            z-index: 1;
+            /* Slight transparency for the glass effect */
+            opacity: 0.92;
+            /* Smooth image rendering */
+            image-rendering: auto;
+        }
+
+        /* --- GLASS REFLECTION OVERLAY ---
+               Creates a subtle light reflection/sheen on top of the image,
+               simulating light hitting a glass surface. */
+        .hero__image-card::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: var(--border-radius-card);
+            z-index: 2;
+            pointer-events: none;
+            /* Diagonal glass reflection gradient */
+            background: linear-gradient(
+                155deg,
+                rgba(255, 255, 255, 0.10) 0%,
+                rgba(255, 255, 255, 0.03) 22%,
+                rgba(255, 255, 255, 0.0) 42%,
+                rgba(255, 255, 255, 0.0) 58%,
+                rgba(255, 255, 255, 0.04) 78%,
+                rgba(255, 255, 255, 0.10) 100%
+            );
+            /* Subtle inner border highlight at the top edge */
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        }
+
+        /* --- Extra glass highlight line at the top edge --- */
+        .hero__image-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 8%;
+            right: 8%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.22), transparent);
+            z-index: 3;
+            pointer-events: none;
+            border-radius: 50%;
+        }
+
+        /* ============================================================
+               RESPONSIVE BEHAVIOR
+               ============================================================ */
+        /* Tablet — slightly tighter gap, smaller image */
+        @media (max-width: 1024px) {
+            :root {
+                --left-col-width: 48%;
+                --right-col-width: 52%;
+                --image-max-width: 440px;
+                --perspective-depth: 1100px;
+            }
+
+            .hero {
+                padding: 3rem 1.5rem;
+            }
+            .hero__container {
+                gap: 2rem;
+            }
+            .hero__visual {
+                min-height: 400px;
+            }
+        }
+
+        /* Mobile — stack vertically, content first, animation below */
+        @media (max-width: 768px) {
+            :root {
+                --left-col-width: 100%;
+                --right-col-width: 100%;
+                --image-max-width: 380px;
+                --perspective-depth: 900px;
+                --start-translate-x: -140%;
+                --start-rotate-y: 22deg;
+                /* Slightly less dramatic for smaller screens */
+                --animation-duration: 1.5s;
+            }
+
+            .hero {
+                padding: 2.5rem 1.2rem;
+                min-height: auto;
+                flex-direction: column;
+            }
+
+            .hero__container {
+                grid-template-columns: 1fr;
+                /* Single column */
+                gap: 2.5rem;
+                align-items: center;
+            }
+
+            .hero__content {
+                align-items: center;
+                text-align: center;
+                gap: 1.2rem;
+            }
+            .hero__paragraph {
+                max-width: 90%;
+                margin: 0 auto;
+            }
+
+            .hero__visual {
+                min-height: 320px;
+                border-radius: 14px;
+            }
+
+            .hero__image-card {
+                border-radius: 16px;
+            }
+            .hero__image-card img {
+                border-radius: 16px;
+            }
+            .hero__image-card::after {
+                border-radius: 16px;
+            }
+
+            /* Reduce floating element sizes on mobile */
+            .hero__float--1 {
+                width: 32px;
+                height: 32px;
+            }
+            .hero__float--2 {
+                width: 18px;
+                height: 18px;
+            }
+            .hero__float--3 {
+                width: 42px;
+                height: 42px;
+            }
+            .hero__float--4 {
+                width: 14px;
+                height: 14px;
+            }
+            .hero__float--5 {
+                width: 24px;
+                height: 24px;
+            }
+        }
+
+        /* Small phones — even smaller image */
+        @media (max-width: 480px) {
+            :root {
+                --image-max-width: 300px;
+                --start-translate-x: -120%;
+                --start-rotate-y: 18deg;
+                --perspective-depth: 700px;
+            }
+
+            .hero__visual {
+                min-height: 260px;
+            }
+            .hero__heading {
+                font-size: 2rem;
+            }
+            .hero__paragraph {
+                font-size: 0.95rem;
+            }
+            .hero__button {
+                padding: 0.7rem 1.4rem;
+                font-size: 0.88rem;
+            }
+        }
+
+        /* ============================================================
+               PREFERS REDUCED MOTION — accessibility fallback
+               ============================================================ */
+        @media (prefers-reduced-motion: reduce) {
+            :root {
+                --animation-duration: 0.01s;
+                --start-translate-x: 0%;
+                --start-rotate-y: 0deg;
+                --start-scale: 1;
+                --overshoot-x: 0%;
+            }
+            .hero__image-card {
+                animation-duration: 0.01s;
+            }
+            .hero__ambient-glow,
+            .hero__float,
+            .hero__badge-dot {
+                animation-duration: 0.01s;
+                animation-iteration-count: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ============================================================
+    HERO SECTION
+    Two-column layout: left content (static), right animation (entrance)
+    ============================================================ -->
+    <section class="hero" aria-label="Hero section with animated visual">
+
+        <div class="hero__container">
+
+            <!-- ====================================================
+            LEFT COLUMN — Static Content
+            Replace heading, paragraph, badge, and button text below.
+            ==================================================== -->
+            <div class="hero__content">
+
+                <!-- Badge — small glass pill with pulsing dot -->
+                <div class="hero__badge">
+                    <span class="hero__badge-dot" aria-hidden="true"></span>
+                    Premium Experience
+                </div>
+
+                <!-- Heading — main title. Replace with your own text. -->
+                <h1 class="hero__heading">
+                    Your Content<br>Goes Right Here
+                </h1>
+
+                <!-- Paragraph — short supporting description -->
+                <p class="hero__paragraph">
+                    This is where you describe your product, service, or vision.
+                    The text stays completely static while the animated visual
+                    enters gracefully on the right.
+                </p>
+
+                <!-- Button — glass-style call to action -->
+                <a href="#" class="hero__button" aria-label="Get started">
+                    Get Started
+                    <span class="hero__button-arrow" aria-hidden="true">→</span>
+                </a>
+
+            </div>
+            <!-- END LEFT COLUMN -->
+
+            <!-- ====================================================
+            RIGHT COLUMN — Animation Area
+            The main image card enters from the left, moving right.
+            ==================================================== -->
+            <div class="hero__visual">
+
+                <!-- Ambient glow — soft blue radial light behind everything -->
+                <div class="hero__ambient-glow" aria-hidden="true"></div>
+
+                <!-- Floating decorative glass circles — extremely subtle -->
+                <div class="hero__float hero__float--1" aria-hidden="true"></div>
+                <div class="hero__float hero__float--2" aria-hidden="true"></div>
+                <div class="hero__float hero__float--3" aria-hidden="true"></div>
+                <div class="hero__float hero__float--4" aria-hidden="true"></div>
+                <div class="hero__float hero__float--5" aria-hidden="true"></div>
+
+                <!-- MAIN IMAGE CARD
+                     Replace the image URL below with your own.
+                     The card uses:
+                     - Glassmorphism (semi-transparent, blur, border)
+                     - 3D perspective entrance (rotateY, translateX, scale)
+                     - Premium glow shadow
+                     - Reflection overlay (::after) -->
+                <div class="hero__image-card">
+                    <!--
+                    High-quality dummy image — publicly accessible.
+                    To use your own image, simply replace the src URL.
+                    -->
+                    <img
+                    src="https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&q=80&auto=format&fit=crop"
+                    alt="Abstract technology circuit board with blue tones"
+                    loading="eager"
+                    />
+                </div>
+
+            </div>
+            <!-- END RIGHT COLUMN -->
+
+        </div>
+
+    </section>
+    <!-- END HERO SECTION -->
+
+    <!-- ============================================================
+    JAVASCRIPT — Minimal enhancements
+    Pure CSS handles the main entrance animation.
+    This script adds optional subtle parallax on floating elements
+    and a fallback image if the primary one fails to load.
+    ============================================================ -->
+    <script>
+        (function() {
+            'use strict';
+
+            // ============================================================
+            // IMAGE FALLBACK
+            // If the primary Unsplash image fails to load, swap in a
+            // reliable placeholder. This ensures the animation always
+            // has a visible visual.
+            // ============================================================
+            const img = document.querySelector('.hero__image-card img');
+            const fallbackUrl =
+                'https://picsum.photos/800/600?grayscale&blur=1';
+            const originalUrl = img.src;
+
+            img.addEventListener('error', function handleImgError() {
+                // Remove the listener to prevent infinite loops
+                img.removeEventListener('error', handleImgError);
+                img.src = fallbackUrl;
+                img.alt = 'Decorative placeholder image';
+            });
+
+            // ============================================================
+            // SUBTLE PARALLAX ON FLOATING ELEMENTS
+            // Adds a gentle mouse-follow effect to the floating glass
+            // circles for extra depth. Completely optional and purely
+            // decorative. Disabled on touch devices and for users
+            // who prefer reduced motion.
+            // ============================================================
+            const floats = document.querySelectorAll('.hero__float');
+            const visual = document.querySelector('.hero__visual');
+            const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+
+            if (floats.length > 0 && visual && !prefersReducedMotion && !isTouchDevice) {
+                let rafId = null;
+                let mouseX = 0;
+                let mouseY = 0;
+                let isHovering = false;
+
+                visual.addEventListener('mouseenter', () => {
+                    isHovering = true;
+                });
+                visual.addEventListener('mouseleave', () => {
+                    isHovering = false;
+                    // Reset floating elements to neutral position
+                    floats.forEach((el, i) => {
+                        el.style.transition = 'transform 0.8s cubic-bezier(.16, 1, .3, 1)';
+                        el.style.transform = 'translate(0, 0)';
+                        setTimeout(() => {
+                            el.style.transition = '';
+                        }, 800);
+                    });
+                    if (rafId) cancelAnimationFrame(rafId);
+                });
+
+                visual.addEventListener('mousemove', (e) => {
+                    if (!isHovering) return;
+                    const rect = visual.getBoundingClientRect();
+                    // Normalize mouse position to -0.5 to 0.5 range
+                    mouseX = (e.clientX - rect.left) / rect.width - 0.5;
+                    mouseY = (e.clientY - rect.top) / rect.height - 0.5;
+
+                    if (rafId) cancelAnimationFrame(rafId);
+                    rafId = requestAnimationFrame(updateParallax);
+                });
+
+                function updateParallax() {
+                    floats.forEach((el, i) => {
+                        // Different depth multiplier for each element
+                        const depth = 8 + i * 4;
+                        const tx = mouseX * depth;
+                        const ty = mouseY * depth * 0.7;
+                        // Apply as a transform on top of the float animation
+                        // by using translate() — the CSS float animation
+                        // uses translateY, and this adds a subtle offset.
+                        el.style.transition = 'transform 0.15s ease-out';
+                        el.style.setProperty('--parallax-x', tx + 'px');
+                        el.style.setProperty('--parallax-y', ty + 'px');
+                        el.style.transform = `translate(${tx}px, ${ty}px)`;
+                    });
+                    rafId = null;
+                }
+            }
+
+            // ============================================================
+            // ANIMATION COMPLETION LOGGING (optional — for debugging)
+            // Uncomment the lines below to see when the entrance animation
+            // finishes. Useful for syncing other effects or tracking.
+            // ============================================================
+            /*
+            const imageCard = document.querySelector('.hero__image-card');
+            imageCard.addEventListener('animationend', (e) => {
+              if (e.animationName === 'heroEntrance') {
+                console.log('✅ Hero entrance animation completed at:', Date.now());
+              }
+            });
+            */
+
+        })();
+    </script>
+
+</body>
+</html>
